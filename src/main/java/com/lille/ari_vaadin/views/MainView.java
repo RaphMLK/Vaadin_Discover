@@ -1,4 +1,4 @@
-package com.lille.ari_vaadin;
+package com.lille.ari_vaadin.views;
 
 import java.util.Collections;
 import java.util.List;
@@ -7,6 +7,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.lille.ari_vaadin.models.Question;
+import com.lille.ari_vaadin.services.GreetService;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -28,15 +29,13 @@ import com.vaadin.flow.server.PWA;
  * A new instance of this class is created for every new user and every browser
  * tab/window.
  */
-@Route
-@PWA(name = "Vaadin Application", shortName = "Vaadin App", description = "This is an example Vaadin application.", enableInstallPrompt = false)
+@Route(value = "quizz")
 @CssImport("./styles/shared-styles.css")
 @CssImport(value = "./styles/vaadin-text-field-styles.css", themeFor = "vaadin-text-field")
 public class MainView extends VerticalLayout {
 
 	private VerticalLayout mainLayout;
 	private int index_question = 0;
-	private List<Question> questions;
 	private boolean finishQuestion = false;
 
 	/**
@@ -48,16 +47,15 @@ public class MainView extends VerticalLayout {
 	 *                bean.
 	 */
 	public MainView(@Autowired GreetService service) {
-		this.questions = service.get10Questions().getResults();
 		loadPage();		
 	}
 	
 	public void loadPage() {
 		mainLayout = new VerticalLayout();
 		// Use TextField for standard text input
-		Text question = new Text(StringEscapeUtils.unescapeHtml4(questions.get(index_question).getQuestion()));
+		Text question = new Text(StringEscapeUtils.unescapeHtml4(HomeView.questions.get(index_question).getQuestion()));
 
-		mainLayout.add(question, responses(questions.get(index_question)));
+		mainLayout.add(question, responses(HomeView.questions.get(index_question)));
 		mainLayout.setAlignItems(Alignment.CENTER);
 
 		// Use custom CSS classes to apply styling. This is defined in

@@ -1,4 +1,4 @@
-package com.lille.ari_vaadin;
+package com.lille.ari_vaadin.services;
 
 import java.io.BufferedReader;
 import java.io.IOException;
