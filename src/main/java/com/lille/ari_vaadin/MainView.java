@@ -11,6 +11,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -33,9 +34,10 @@ import com.vaadin.flow.server.PWA;
 @CssImport(value = "./styles/vaadin-text-field-styles.css", themeFor = "vaadin-text-field")
 public class MainView extends VerticalLayout {
 
+	private VerticalLayout mainLayout;
 	private int index_question = 0;
 	private List<Question> questions;
-	private String backgroundStyle = null;
+	private boolean finishQuestion = false;
 
 	/**
 	 * Construct a new Vaadin view.
@@ -47,7 +49,11 @@ public class MainView extends VerticalLayout {
 	 */
 	public MainView(@Autowired GreetService service) {
 		this.questions = service.get10Questions().getResults();
-		VerticalLayout mainLayout = new VerticalLayout();
+		loadPage();		
+	}
+	
+	public void loadPage() {
+		mainLayout = new VerticalLayout();
 		// Use TextField for standard text input
 		Text question = new Text(StringEscapeUtils.unescapeHtml4(questions.get(index_question).getQuestion()));
 
@@ -103,8 +109,27 @@ public class MainView extends VerticalLayout {
 	}
 
 	public void answer(String answer, Question currentQuestion) {
-		System.out.println(answer.equals(currentQuestion.getCorrect_answer()));
-		addClassName(answer.equals(currentQuestion.getCorrect_answer()) ? "goodAnswer" : "badAnswer");
+		if(finishQuestion) return;
+		boolean goodAnswer = answer.equals(currentQuestion.getCorrect_answer());
+		addClassName(goodAnswer ? "goodAnswer" : "badAnswer");
+		if(!goodAnswer) {
+			Notification notification = new Notification("The good answer is " + currentQuestion.getCorrect_answer(), 5000);
+			notification.open();
+		}
+		nextQuestion();
+		finishQuestion = true;
+	}
+	
+	public void nextQuestion() {
+		Button button = new Button("Next question", e -> {
+			removeClassNames("goodAnswer", "badAnswer");
+			this.index_question++;
+			finishQuestion = false;
+			removeAll();
+			loadPage();
+		});
+		mainLayout.add(button);
+		add(mainLayout);
 	}
 
 }
