@@ -7,14 +7,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.lille.ari_vaadin.models.Question;
-import com.lille.ari_vaadin.services.GreetService;
+import com.lille.ari_vaadin.services.QuestionService;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.PWA;
 
@@ -30,10 +28,10 @@ public class HomeView extends VerticalLayout{
 
 
 	@Autowired
-	public HomeView( GreetService service, CocktailService cocktailService) {
+	public HomeView(QuestionService service, CocktailService cocktailService) {
 		this.cocktailService = cocktailService;
 
-		questions = service.get10Questions().getResults();
+		questions = service.getQuestion(10).getResults();
 
 		Text title = new Text("Bienvenue ! ");
 

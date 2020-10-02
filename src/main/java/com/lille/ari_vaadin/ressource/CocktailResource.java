@@ -17,10 +17,8 @@ public class CocktailResource {
     private static final String ENDPOINT_RANDOM_COCKTAIL = "random.php";
 
     private RestTemplate restTemplate;
-    private ObjectMapper objectMapper;
 
     public CocktailResource(RestTemplateBuilder restTemplateBuilder) {
-        this.objectMapper = new ObjectMapper();
         this.restTemplate = restTemplateBuilder.build();
     }
 

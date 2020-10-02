@@ -7,7 +7,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.lille.ari_vaadin.models.Question;
-import com.lille.ari_vaadin.services.GreetService;
+import com.lille.ari_vaadin.services.QuestionService;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -45,7 +45,7 @@ public class MainView extends VerticalLayout {
 	 * @param service The message service. Automatically injected Spring managed
 	 *                bean.
 	 */
-	public MainView(@Autowired GreetService service) {
+	public MainView(@Autowired QuestionService service) {
 		System.out.println(HomeView.questions);
 		if (HomeView.questions == null) {
 			goToHomePage();
