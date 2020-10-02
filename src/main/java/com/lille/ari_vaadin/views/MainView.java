@@ -16,7 +16,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.PWA;
 
 /**
  * A sample Vaadin view class.
@@ -47,9 +46,22 @@ public class MainView extends VerticalLayout {
 	 *                bean.
 	 */
 	public MainView(@Autowired GreetService service) {
-		loadPage();		
+		System.out.println(HomeView.questions);
+		if (HomeView.questions == null) {
+			goToHomePage();
+		} else {
+			loadPage();
+		}
 	}
-	
+
+	public void goToHomePage() {
+		Text title = new Text("Go to Home Page to generate questions");
+		Button button1 = new Button("Start");
+		button1.addClickListener(e -> button1.getUI().ifPresent(ui -> ui.navigate("home")));
+		add(title, button1);
+		setAlignItems(Alignment.CENTER);
+	}
+
 	public void loadPage() {
 		mainLayout = new VerticalLayout();
 		// Use TextField for standard text input
@@ -107,17 +119,19 @@ public class MainView extends VerticalLayout {
 	}
 
 	public void answer(String answer, Question currentQuestion) {
-		if(finishQuestion) return;
+		if (finishQuestion)
+			return;
 		boolean goodAnswer = answer.equals(currentQuestion.getCorrect_answer());
 		addClassName(goodAnswer ? "goodAnswer" : "badAnswer");
-		if(!goodAnswer) {
-			Notification notification = new Notification("The good answer is " + currentQuestion.getCorrect_answer(), 5000);
+		if (!goodAnswer) {
+			Notification notification = new Notification("The good answer is " + currentQuestion.getCorrect_answer(),
+					5000);
 			notification.open();
 		}
 		nextQuestion();
 		finishQuestion = true;
 	}
-	
+
 	public void nextQuestion() {
 		Button button = new Button("Next question", e -> {
 			removeClassNames("goodAnswer", "badAnswer");
