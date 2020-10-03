@@ -18,15 +18,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 /**
- * A sample Vaadin view class.
- * <p>
- * To implement a Vaadin view just extend any Vaadin component and use @Route
- * annotation to announce it in a URL as a Spring managed bean. Use the @PWA
- * annotation make the application installable on phones, tablets and some
- * desktop browsers.
- * <p>
- * A new instance of this class is created for every new user and every browser
- * tab/window.
+ * Quizz page
  */
 @Route(value = "quizz")
 @CssImport("./styles/shared-styles.css")
@@ -36,11 +28,11 @@ public class MainView extends VerticalLayout {
 	private VerticalLayout mainLayout;
 	private int index_question = 0;
 	private boolean finishQuestion = false;
+	private int goodAnswers = 0;
 
 	/**
-	 * Construct a new Vaadin view.
-	 * <p>
-	 * Build the initial UI state for the user accessing the application.
+	 * Choose a Vaadin view if the questions are been generated or no Build the
+	 * initial UI state for the user accessing the application.
 	 *
 	 * @param service The message service. Automatically injected Spring managed
 	 *                bean.
@@ -54,32 +46,53 @@ public class MainView extends VerticalLayout {
 		}
 	}
 
+	/**
+	 * Construct a view if the questions are'nt been generated
+	 */
 	public void goToHomePage() {
 		Text title = new Text("Go to Home Page to generate questions");
 		Button button1 = new Button("Start");
-		button1.addClickListener(e -> button1.getUI().ifPresent(ui -> ui.navigate("home")));
+		button1.addClickListener(e -> button1.getUI().ifPresent(ui -> ui.navigate("")));
 		add(title, button1);
 		setAlignItems(Alignment.CENTER);
 	}
 
+	/**
+	 * Construct a view if the questions are been generated
+	 */
 	public void loadPage() {
-		mainLayout = new VerticalLayout();
-		// Use TextField for standard text input
-		Text question = new Text(StringEscapeUtils.unescapeHtml4(HomeView.questions.get(index_question).getQuestion()));
+		// display score if all question are been answered
+		// display question and potential answer if questions are not answered yet
+		if (index_question == HomeView.questions.size()) {
+			displayScore();
+		} else {
+			mainLayout = new VerticalLayout();
+			Text question = new Text(
+					StringEscapeUtils.unescapeHtml4(HomeView.questions.get(index_question).getQuestion()));
 
-		mainLayout.add(question, responses(HomeView.questions.get(index_question)));
-		mainLayout.setAlignItems(Alignment.CENTER);
+			mainLayout.add(question, responses(HomeView.questions.get(index_question)));
+			mainLayout.setAlignItems(Alignment.CENTER);
 
-		// Use custom CSS classes to apply styling. This is defined in
-		// shared-styles.css.
-		addClassName("centered-content");
-		setSizeFull();
+			// Use custom CSS classes to apply styling. This is defined in
+			// shared-styles.css.
+			addClassName("centered-content");
+			setSizeFull();
 
-		add(mainLayout);
+			add(mainLayout);
+		}
 	}
 
+	/**
+	 * Generate vertical layout with answer buttons
+	 * 
+	 * @param question the current question
+	 * @return vertical layout contains only buttons
+	 */
 	public VerticalLayout responses(Question question) {
 		VerticalLayout buttons = new VerticalLayout();
+		// 2 types of questions : true/false or MCQ (QCM)
+		// 2 buttons for true and false or 4 buttons for MCQ
+		// You are free to display the buttons are you want
 		if (question.getType().equals("boolean")) {
 			HorizontalLayout horizontalLayout = new HorizontalLayout();
 			Button trueButton = new Button("True", e -> answer("True", question));
@@ -98,18 +111,22 @@ public class MainView extends VerticalLayout {
 			Button button1 = new Button(StringEscapeUtils.unescapeHtml4(allResponses.get(0)),
 					e -> answer(allResponses.get(0), question));
 			button1.setClassName("buttonResponse");
+			button1.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 			Button button2 = new Button(StringEscapeUtils.unescapeHtml4(allResponses.get(1)),
 					e -> answer(allResponses.get(1), question));
 			button2.setClassName("buttonResponse");
+			button2.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 			firstLayout.add(button1, button2);
 
 			HorizontalLayout secondLayout = new HorizontalLayout();
 			Button button3 = new Button(StringEscapeUtils.unescapeHtml4(allResponses.get(2)),
 					e -> answer(allResponses.get(2), question));
 			button3.setClassName("buttonResponse");
+			button3.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 			Button button4 = new Button(StringEscapeUtils.unescapeHtml4(allResponses.get(3)),
 					e -> answer(allResponses.get(3), question));
 			button4.setClassName("buttonResponse");
+			button4.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 			secondLayout.add(button3, button4);
 
 			buttons.add(firstLayout, secondLayout);
@@ -118,12 +135,24 @@ public class MainView extends VerticalLayout {
 		return buttons;
 	}
 
+	/**
+	 * Behavior when you click on answer button : If the question is already
+	 * answered : do nothing / Set class name for general view : if good answer the
+	 * class name is "goodAnswer", "badAnswer" otherwise / Increment the total of
+	 * good answers / Make a notification with the good answer if the answer is
+	 * incorrect / Call nextQuestion()
+	 * 
+	 * @param answer          the answer chosen by the user
+	 * @param currentQuestion the current question
+	 */
 	public void answer(String answer, Question currentQuestion) {
 		if (finishQuestion)
 			return;
 		boolean goodAnswer = answer.equals(currentQuestion.getCorrect_answer());
 		addClassName(goodAnswer ? "goodAnswer" : "badAnswer");
-		if (!goodAnswer) {
+		if (goodAnswer) {
+			this.goodAnswers++;
+		} else {
 			Notification notification = new Notification("The good answer is " + currentQuestion.getCorrect_answer(),
 					5000);
 			notification.open();
@@ -132,6 +161,10 @@ public class MainView extends VerticalLayout {
 		finishQuestion = true;
 	}
 
+	/**
+	 * Add a button to pass to the next question. The button handle the pass to the
+	 * next question
+	 */
 	public void nextQuestion() {
 		Button button = new Button("Next question", e -> {
 			removeClassNames("goodAnswer", "badAnswer");
@@ -140,8 +173,20 @@ public class MainView extends VerticalLayout {
 			removeAll();
 			loadPage();
 		});
+		button.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 		mainLayout.add(button);
 		add(mainLayout);
+	}
+
+	/**
+	 * Display the score
+	 */
+	public void displayScore() {
+		Text score = new Text("Your score is : " + goodAnswers + "/" + HomeView.questions.size());
+		Button goHome = new Button("Go to Home page");
+		goHome.addClickListener(e -> goHome.getUI().ifPresent(ui -> ui.navigate("")));
+		add(score, goHome);
+		setAlignItems(Alignment.CENTER);
 	}
 
 }

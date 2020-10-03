@@ -2,17 +2,20 @@ package com.lille.ari_vaadin.views;
 
 import java.util.List;
 
-import com.lille.ari_vaadin.services.CocktailService;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.lille.ari_vaadin.models.Question;
+import com.lille.ari_vaadin.services.CocktailService;
 import com.lille.ari_vaadin.services.QuestionService;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.PWA;
 
@@ -20,36 +23,54 @@ import com.vaadin.flow.server.PWA;
 @PWA(name = "Vaadin Application", shortName = "Vaadin App", description = "This is an example Vaadin application.", enableInstallPrompt = false)
 @CssImport("./styles/shared-styles.css")
 @CssImport(value = "./styles/vaadin-text-field-styles.css", themeFor = "vaadin-text-field")
-public class HomeView extends VerticalLayout{
+public class HomeView extends VerticalLayout {
 
+	/**
+	 * The questions for the quizz
+	 */
 	public static List<Question> questions;
 
+	/**
+	 * Service to CocktailView
+	 */
 	private CocktailService cocktailService;
 
+	/**
+	 * Service to MainView
+	 */
+	private QuestionService questionService;
 
+	/**
+	 * Construct the Vaadin Home page
+	 * 
+	 * @param questionService the question service
+	 * @param cocktailService the cocktail service
+	 */
 	@Autowired
-	public HomeView(QuestionService service, CocktailService cocktailService) {
+	public HomeView(QuestionService questionService, CocktailService cocktailService) {
 		this.cocktailService = cocktailService;
-
-		questions = service.getQuestion(10).getResults();
-
-		Text title = new Text("Bienvenue ! ");
+		this.questionService = questionService;
 
 		HorizontalLayout menu = new HorizontalLayout();
 
 		Button buttonQuizz = new Button("Quizz");
-		buttonQuizz.addClickListener(e -> buttonQuizz.getUI().ifPresent(ui -> ui.navigate("quizz")));
+		buttonQuizz.addClickListener(e -> startQuizz().open());
 		menu.addAndExpand(buttonQuizz);
 
 		Button buttonCocktail = new Button("Random coktail");
 		buttonCocktail.addClickListener(e -> buttonCocktail.getUI().ifPresent(ui -> ui.navigate("cocktail")));
 		menu.addAndExpand(buttonCocktail);
 
-		add(imageBanner(), title, menu);
-
-
+		HorizontalLayout images = imageBanner();
+		add(images, menu);
+		setAlignItems(Alignment.CENTER);
 	}
 
+	/**
+	 * Banner with all images
+	 * 
+	 * @return a horizontal layout
+	 */
 	public HorizontalLayout imageBanner() {
 		HorizontalLayout images = new HorizontalLayout();
 		Image univLogo = new Image(
@@ -57,13 +78,45 @@ public class HomeView extends VerticalLayout{
 				"Université de Lille");
 		univLogo.setWidth("300px");
 		Image miageLogo = new Image(
-				"https://lh3.googleusercontent.com/proxy/cBVv6waxc3HSUjOTvxPyAfD0EEswltj_OVw7ECFWUGHZfQ0ueqXU0QTAiv7pyvUw8MYU9khDrx7xWkj4hrU5mrPZ4VRlrgrTAgY2OPA3f_HZ8h7uUR8__i81BijYv987uP6O",
+				"https://lh3.googleusercontent.com/proxy/NPSjQjtNQDHueFLzmygj2mytF3Zp_TA00kJbaX4yOj3JDZz__-ve92j7aZuMu_SNVj5P3YLTkS_Vu31SajiszkER8M1JXUBwmUmhEVyj1z3cAwDT2kmUXE163pxzbKQuxus0",
 				"MIAGE");
 		miageLogo.setWidth("300px");
 		miageLogo.setHeight("70px");
-		images.add(univLogo, miageLogo);
+		Image vaadinLogo = new Image("https://cdn2.hubspot.net/hubfs/1840687/Pages/trademark/vaadin-logo-full.svg",
+				"Vaadin");
+		vaadinLogo.setWidth("300px");
+		images.add(univLogo, vaadinLogo, miageLogo);
 		images.setVerticalComponentAlignment(Alignment.CENTER, miageLogo);
 		return images;
+	}
+
+	/**
+	 * Dialog to start quizz. The user fill in the wanted number of question
+	 * 
+	 * @return a dialog
+	 */
+	public Dialog startQuizz() {
+		Dialog dialog = new Dialog();
+		VerticalLayout layout = new VerticalLayout();
+		Text text = new Text("Chooser the number of questions");
+		IntegerField nbQuestion = new IntegerField();
+		nbQuestion.setMin(1);
+		nbQuestion.setValue(10);
+		Button valid = new Button("Start");
+		valid.addClickListener(e -> {
+			if (nbQuestion.getValue() == null || nbQuestion.getValue() <= 0) {
+				Notification notification = new Notification("The number of question is required (can't be 0)", 5000);
+				notification.open();
+			} else {
+				questions = this.questionService.getQuestion(nbQuestion.getValue()).getResults();
+				valid.getUI().ifPresent(ui -> ui.navigate("quizz"));
+				dialog.close();
+			}
+		});
+		layout.add(text, nbQuestion, valid);
+		layout.setAlignItems(Alignment.CENTER);
+		dialog.add(layout);
+		return dialog;
 	}
 
 }
