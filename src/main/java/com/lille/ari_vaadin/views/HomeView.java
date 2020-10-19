@@ -7,15 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.lille.ari_vaadin.models.Question;
 import com.lille.ari_vaadin.services.CocktailService;
 import com.lille.ari_vaadin.services.QuestionService;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.PWA;
 
@@ -96,27 +93,9 @@ public class HomeView extends VerticalLayout {
 	 * @return a dialog
 	 */
 	public Dialog startQuizz() {
-		Dialog dialog = new Dialog();
-		VerticalLayout layout = new VerticalLayout();
-		Text text = new Text("Chooser the number of questions");
-		IntegerField nbQuestion = new IntegerField();
-		nbQuestion.setMin(1);
-		nbQuestion.setValue(10);
-		Button valid = new Button("Start");
-		valid.addClickListener(e -> {
-			if (nbQuestion.getValue() == null || nbQuestion.getValue() <= 0) {
-				Notification notification = new Notification("The number of question is required (can't be 0)", 5000);
-				notification.open();
-			} else {
-				questions = this.questionService.getQuestion(nbQuestion.getValue()).getResults();
-				valid.getUI().ifPresent(ui -> ui.navigate("quizz"));
-				dialog.close();
-			}
-		});
-		layout.add(text, nbQuestion, valid);
-		layout.setAlignItems(Alignment.CENTER);
-		dialog.add(layout);
-		return dialog;
+		// TODO
+		// Return a dialog to choose the number of questions
+		return null;
 	}
 
 }
