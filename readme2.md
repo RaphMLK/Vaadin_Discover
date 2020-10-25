@@ -16,6 +16,8 @@ Il suffira ensuite de "run" la classe Application
 
 ### Intellij
 
+Pas besoin de plug-in en particulier, l'utilisation de maven suffit.
+
 ## TP - Quizz App
 
 Dans l'application, vous pourrez retrouver l'ensemble de la partie Live Coding de la présentation.
